@@ -1,20 +1,20 @@
 import { Page, Locator } from '@playwright/test';
 
-export default class LoginPage {
+export default class SignUpPage {
   readonly page: Page;
   readonly modal: Locator;
   readonly usernameInput: Locator;
   readonly passwordInput: Locator;
-  readonly loginButton: Locator;
+  readonly signUpButton: Locator;
   readonly closeButton: Locator;
   readonly xButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.modal = page.locator('#logInModal');
-    this.usernameInput = page.locator('#loginusername');
-    this.passwordInput = page.locator('#loginpassword');
-    this.loginButton = this.modal.locator('button.btn-primary', { hasText: 'Log in' });
+    this.modal = page.locator('#signInModal');
+    this.usernameInput = page.locator('#sign-username');
+    this.passwordInput = page.locator('#sign-password');
+    this.signUpButton = this.modal.locator('button.btn-primary', { hasText: 'Sign up' });
     this.closeButton = this.modal.locator('button.btn-secondary', { hasText: 'Close' });
     this.xButton = this.modal.locator('button.close');
   }
@@ -31,21 +31,17 @@ export default class LoginPage {
     await this.passwordInput.fill(password);
   }
 
-  async clickLogin(): Promise<void> {
-    await this.page.evaluate(() => setTimeout(logIn, 0));
+  async clickSignUp(): Promise<void> {
+    await this.page.evaluate(() => setTimeout(register, 0));
   }
 
-  async clickAndAcceptDialog(): Promise<string | null> {
-    try {
-      const dialogPromise = this.page.waitForEvent('dialog', { timeout: 10_000 });
-      await this.page.evaluate(() => setTimeout(logIn, 0));
-      const dialog = await dialogPromise;
-      const message = dialog.message();
-      await dialog.accept();
-      return message;
-    } catch {
-      return null;
-    }
+  async clickAndAcceptDialog(): Promise<string> {
+    const dialogPromise = this.page.waitForEvent('dialog', { timeout: 10_000 });
+    await this.page.evaluate(() => setTimeout(register, 0));
+    const dialog = await dialogPromise;
+    const message = dialog.message();
+    await dialog.accept();
+    return message;
   }
 
   async clickClose(): Promise<void> {
@@ -58,6 +54,11 @@ export default class LoginPage {
 
   async pressEscape(): Promise<void> {
     await this.page.keyboard.press('Escape');
+  }
+
+  async isPasswordMasked(): Promise<boolean> {
+    const type = await this.passwordInput.getAttribute('type');
+    return type === 'password';
   }
 
   async isModalVisible(): Promise<boolean> {
@@ -75,9 +76,9 @@ export default class LoginPage {
       await this.page.evaluate(() => {
         const $ = (window as any).$;
         if ($) {
-          $('#logInModal').modal('hide');
+          $('#signInModal').modal('hide');
         } else {
-          const m = document.getElementById('logInModal');
+          const m = document.getElementById('signInModal');
           if (m) {
             m.style.display = 'none';
             m.classList.remove('show');
@@ -98,7 +99,7 @@ export default class LoginPage {
     await this.page.evaluate(() => {
       const $ = (window as any).$;
       if ($) {
-        $('#logInModal').modal('show');
+        $('#signInModal').modal('show');
       }
     });
   }
@@ -112,5 +113,15 @@ export default class LoginPage {
     } catch {
       return null;
     }
+  }
+
+  async waitForSingleDialogAfterDoubleClick(): Promise<string> {
+    await this.page.evaluate(() => { setTimeout(register, 0); setTimeout(register, 0); });
+    await this.page.waitForTimeout(300);
+
+    const dialog = await this.page.waitForEvent('dialog', { timeout: 10_000 });
+    const message = dialog.message();
+    await dialog.accept();
+    return message;
   }
 }
