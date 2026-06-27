@@ -12,7 +12,7 @@ npx playwright show-report             # view HTML report
 npx playwright install                 # install browsers
 ```
 
-**Config is at `src/config/playwright.config.ts`** — `npx playwright test` (no flag) will NOT find it automatically. Always pass `--config=src/config/playwright.config.ts` or set `PLAYWRIGHT_CONFIG` env.
+**Config is at `src/config/playwright.config.ts`** — `npx playwright test` (no flag) will NOT find it automatically. Always pass `--config=src/config/playwright.config.ts`. All paths inside config (`testDir`, etc.) are relative to the config file's directory.
 
 ## CI (`.github/workflows/playwright.yml`)
 
