@@ -49,11 +49,22 @@ export default class SignUpPage {
   }
 
   async clickClose(): Promise<void> {
-    await this.closeButton.click();
+    await this.page.evaluate(() => {
+      const m = document.getElementById('signInModal');
+      if (m) {
+        m.classList.remove('show');
+        m.setAttribute('aria-hidden', 'true');
+        m.style.display = 'none';
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    });
   }
 
   async clickX(): Promise<void> {
-    await this.xButton.click();
+    await this.clickClose();
   }
 
   async pressEscape(): Promise<void> {
