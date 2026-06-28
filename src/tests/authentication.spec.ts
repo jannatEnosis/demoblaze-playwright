@@ -22,6 +22,24 @@ test.describe('Sign Up', () => {
     await homePage.goto();
   });
 
+  test.afterEach(async ({ page }) => {
+    await page.evaluate(() => {
+      const $ = (window as any).$;
+      if ($) {
+        try {
+          $('.modal.show').modal('hide');
+        } catch {}
+        $('.modal').each(function (this: HTMLElement) {
+          $(this).removeData('bs.modal');
+        });
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    });
+  });
+
   test('1.1 Sign up with valid new username & password', async () => {
     const username = uniqueUsername();
     await homePage.clickSignUpLink();
@@ -257,6 +275,24 @@ test.describe('Log In', () => {
     await signUpPage.fillPassword(PASSWORD);
     await signUpPage.clickAndAcceptDialog();
     await signUpPage.waitForModalToClose();
+  });
+
+  test.afterEach(async ({ page }) => {
+    await page.evaluate(() => {
+      const $ = (window as any).$;
+      if ($) {
+        try {
+          $('.modal.show').modal('hide');
+        } catch {}
+        $('.modal').each(function (this: HTMLElement) {
+          $(this).removeData('bs.modal');
+        });
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    });
   });
 
   async function loginAndWaitForSuccess(): Promise<void> {

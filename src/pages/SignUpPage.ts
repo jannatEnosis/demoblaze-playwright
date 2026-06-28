@@ -24,20 +24,24 @@ export default class SignUpPage {
   }
 
   async fillUsername(username: string): Promise<void> {
+    await this.usernameInput.waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(300);
     await this.usernameInput.fill(username);
   }
 
   async fillPassword(password: string): Promise<void> {
+    await this.passwordInput.waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(300);
     await this.passwordInput.fill(password);
   }
 
   async clickSignUp(): Promise<void> {
-    await this.page.evaluate(() => setTimeout(register, 0));
+    await this.page.evaluate(() => setTimeout(() => (window as any).register(), 0));
   }
 
   async clickAndAcceptDialog(): Promise<string> {
     const dialogPromise = this.page.waitForEvent('dialog', { timeout: 10_000 });
-    await this.page.evaluate(() => setTimeout(register, 0));
+    await this.page.evaluate(() => setTimeout(() => (window as any).register(), 0));
     const dialog = await dialogPromise;
     const message = dialog.message();
     await dialog.accept();
@@ -77,6 +81,7 @@ export default class SignUpPage {
         const $ = (window as any).$;
         if ($) {
           $('#signInModal').modal('hide');
+          $('#signInModal').removeData('bs.modal');
         } else {
           const m = document.getElementById('signInModal');
           if (m) {
@@ -90,6 +95,10 @@ export default class SignUpPage {
     }
     await this.page.waitForTimeout(300);
     await this.page.evaluate(() => {
+      const $ = (window as any).$;
+      if ($) {
+        $('#signInModal').removeData('bs.modal');
+      }
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
       document.body.classList.remove('modal-open');
     });
@@ -116,7 +125,7 @@ export default class SignUpPage {
   }
 
   async waitForSingleDialogAfterDoubleClick(): Promise<string> {
-    await this.page.evaluate(() => { setTimeout(register, 0); setTimeout(register, 0); });
+    await this.page.evaluate(() => { setTimeout(() => (window as any).register(), 0); setTimeout(() => (window as any).register(), 0); });
     await this.page.waitForTimeout(300);
 
     const dialog = await this.page.waitForEvent('dialog', { timeout: 10_000 });

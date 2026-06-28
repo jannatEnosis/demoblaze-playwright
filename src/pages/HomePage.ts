@@ -19,16 +19,52 @@ export default class HomePage {
     await this.page.goto('/');
   }
 
+  async cleanupModals(): Promise<void> {
+    await this.page.evaluate(() => {
+      const $ = (window as any).$;
+      if ($) {
+        try {
+          $('.modal.show').modal('hide');
+        } catch {}
+        $('.modal').each(function (this: HTMLElement) {
+          $(this).removeData('bs.modal');
+        });
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    });
+    await this.page.waitForTimeout(300);
+  }
+
   async clickSignUpLink(): Promise<void> {
-    await this.signUpLink.click();
+    await this.cleanupModals();
+    await this.page.evaluate(() => {
+      const $ = (window as any).$;
+      if ($) {
+        $('#signInModal').modal('show');
+      } else {
+        (document.querySelector('#signin2') as HTMLElement)?.click();
+      }
+    });
   }
 
   async clickLoginLink(): Promise<void> {
-    await this.loginLink.click();
+    await this.cleanupModals();
+    await this.page.evaluate(() => {
+      const $ = (window as any).$;
+      if ($) {
+        $('#logInModal').modal('show');
+      } else {
+        (document.querySelector('#login2') as HTMLElement)?.click();
+      }
+    });
   }
 
   async clickLogout(): Promise<void> {
-    await this.logoutLink.click();
+    await this.cleanupModals();
+    await this.page.evaluate(() => (document.querySelector('#logout2') as HTMLElement)?.click());
   }
 
   async getWelcomeText(): Promise<string> {

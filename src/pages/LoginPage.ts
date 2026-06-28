@@ -24,21 +24,25 @@ export default class LoginPage {
   }
 
   async fillUsername(username: string): Promise<void> {
+    await this.usernameInput.waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(300);
     await this.usernameInput.fill(username);
   }
 
   async fillPassword(password: string): Promise<void> {
+    await this.passwordInput.waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(300);
     await this.passwordInput.fill(password);
   }
 
   async clickLogin(): Promise<void> {
-    await this.page.evaluate(() => setTimeout(logIn, 0));
+    await this.page.evaluate(() => setTimeout(() => (window as any).logIn(), 0));
   }
 
   async clickAndAcceptDialog(): Promise<string | null> {
     try {
       const dialogPromise = this.page.waitForEvent('dialog', { timeout: 10_000 });
-      await this.page.evaluate(() => setTimeout(logIn, 0));
+      await this.page.evaluate(() => setTimeout(() => (window as any).logIn(), 0));
       const dialog = await dialogPromise;
       const message = dialog.message();
       await dialog.accept();
@@ -76,6 +80,7 @@ export default class LoginPage {
         const $ = (window as any).$;
         if ($) {
           $('#logInModal').modal('hide');
+          $('#logInModal').removeData('bs.modal');
         } else {
           const m = document.getElementById('logInModal');
           if (m) {
@@ -89,6 +94,10 @@ export default class LoginPage {
     }
     await this.page.waitForTimeout(300);
     await this.page.evaluate(() => {
+      const $ = (window as any).$;
+      if ($) {
+        $('#logInModal').removeData('bs.modal');
+      }
       document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
       document.body.classList.remove('modal-open');
     });
